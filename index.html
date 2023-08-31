@@ -8,11 +8,8 @@
     <link rel="stylesheet" href="./codemirror-5.65.14/lib/codemirror.css" />
     <link rel="stylesheet" href="./codemirror-5.65.14/theme/dracula.css" />
     
-    <script src="./codemirror-5.65.14/lib/codemirror.js" ></script>
-    <script src="./codemirror-5.65.14/mode/javascript/javascript.js" ></script>
-    <script src="./codemirror-5.65.14/addon/keyword.1.0.js" ></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     
+
     <style>
         .CodeMirror {
             font-size: 16px;
@@ -23,10 +20,22 @@
          .cm-style1 {
             color: #ff79c6 !important;
             }
+        .pe{
+            background-color: #1d2147 !important;
+            color: white !important;
+        }
 
     </style>
 </head>
 <body>
+    <nav class="navbar navbar-dark pe" >
+        <div class="container-fluid pe" >
+          <a class="navbar-brand" href="#">
+            <img src="./img/logo_PE.png" alt="" width="50" class="d-inline-block align-text-top">
+            Algoritimo Efetivo
+          </a>
+        </div>
+      </nav>
     <div class="container-fluid">
         <div class="card" >
             <div class="card-body">
@@ -37,7 +46,7 @@
                         </div>
                     </div>
                     <div class="col-md-1 text-center ">
-                        <button type="button" style="width: 100%;" class="btn btn-primary" onclick="compilaAlgoritimo()">Executar</button>
+                        <button type="button" style="width: 100%;" class="btn pe" onclick="algoritimoEfetivo.interpreta()">Executar</button>
                     </div>
                     <div class="col-md-5">
                         <div style="border: dashed 1px; min-height:100%; padding: 10px; background: #ddd;" id="div_log"></div>
@@ -48,99 +57,10 @@
     </div>
 
         
-    <script >
-
-        console.log('carregou'); 
-
-
-        let editor = CodeMirror.fromTextArea(
-            document.getElementById("algoritimo"), {
-                mode: 'javascript',
-                lineNumbers: true,
-                theme: "dracula",
-                keyword: {
-                    "se": "style1",
-                    "para": "style1",
-                    "enquanto": "style1",
-                    "senão": "style1",
-                    "senao": "style1",
-                    "faca": "style1",
-                    "faça": "style1",
-                    "example\.com": "style2",
-                    "abc\\d+": "style2"
-                }
-        });
-
-        editor.getDoc().setValue((localStorage.getItem('algoritimo') || 'teste'));
-        
-        const  algoritimo = localStorage.getItem('algoritimo');
-        document.getElementById('algoritimo').value = algoritimo;
-
-        function compilaAlgoritimo(){
-
-            limpaLog();
-            
-            let algoritimo = editor.getDoc().getValue(); //document.getElementById('algoritimo').value;
-
-            localStorage.setItem('algoritimo', algoritimo);
-
-            let codigo = algoritimo
-                        .replace(/var /ig, 'let ')
-                        .replace(/se\(/ig, 'if(')
-                        .replace(/senao\{/ig, 'else{')
-                        .replace(/senão{/ig, 'else{')
-                        .replace(/\para\(/ig, 'for(')
-                        .replace(/\enquanto\(/ig, 'while(')
-                        .replace(/\faça\(/ig, 'do(')
-                        .replace(/\faca\(/ig, 'do(')
-                        .replace(/\.paraCada\( /ig, 'forEach(')
-                        .replace(/recebe\(/ig, 'prompt(')
-                        .replace(/imprime\(/ig, 'log(');
-
-            //FOR
-            let novoCodigo = codigo;
-            let iFor = codigo.indexOf('for(');
-            let fFor = codigo.indexOf(')', iFor);
-            while(iFor !=-1){
-                let sub = codigo.substring(iFor+4);
-                let iFim = sub.indexOf(')');
-
-                sub = sub.substring(0,iFim);
-                let dados = sub.split(' ');
-                let novo = dados[1].replace('de','let '+dados[0]+'=');
-                novo += dados[2]+";";
-                novo += 'i<'+dados[4]+";";
-                novo += dados[0]+'++';
-
-                novoCodigo = codigo.substring(0,iFor) + 'for('+novo+')' + codigo.substring(fFor+1) ;
-
-                iFor = codigo.indexOf('for(', iFor+4);
-                fFor = codigo.indexOf(')', iFor);
-            }
-            codigo = novoCodigo;
-
-
-
-            console.log(codigo);
-            try {
-                eval(codigo);
-            } catch (error) {
-                alert('falha no algoritimo.');
-                console.log(error);
-            }
-            
-        }
-
-        function log(valor){
-            let logAtual = document.getElementById('div_log').innerHTML;
-            logAtual += '<br>'+ valor;
-            document.getElementById('div_log').innerHTML = logAtual;
-        }
-        
-        function limpaLog(){
-            document.getElementById('div_log').innerHTML = '';
-        }
-
-    </script>
+    <script src="./codemirror-5.65.14/lib/codemirror.js" ></script>
+    <script src="./codemirror-5.65.14/mode/javascript/javascript.js" ></script>
+    <script src="./codemirror-5.65.14/addon/keyword.1.0.js" ></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="./algoritmo-efetivo.js"></script>
 </body>
 </html>

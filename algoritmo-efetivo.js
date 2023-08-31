@@ -93,26 +93,39 @@ algoritimoEfetivo =  (()=>{
         const aluno = getObjLocal('aluno');
         if(!aluno){
             let aluno = {};
-            aluno.nome = prompt('Bem vindo ao algoritimo efetivo. Qual seu nome?');
             aluno.email = prompt('E seu e-mail?');
-            aluno.codigos = {};
-            aluno.codigos['algoritimo'] = '//escreva seu primeiro algoritimo aqui';
-            setObjLocal('aluno',aluno);
-            fbService.salvaDados(aluno, ()=>{
-                algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
-                this.editor.getDoc().setValue(algoritimo);
+            
+            fbService.getDados(aluno,(alunoBase)=>{
+
+                if(alunoBase){
+                    aluno = alunoBase;
+                    algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
+                    this.editor.getDoc().setValue(algoritimo);
+                    setObjLocal('aluno',aluno);
+                    alert('Bem vindo de volta, '+aluno.nome);
+                }else{
+                    aluno.nome = prompt('Bem vindo ao algoritimo efetivo. Qual seu nome?');
+                    aluno.codigos = {};
+                    aluno.codigos['algoritimo'] = '//escreva seu primeiro algoritimo aqui';
+                    fbService.salvaDados(aluno, ()=>{
+                        setObjLocal('aluno',aluno);
+                        algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
+                        this.editor.getDoc().setValue(algoritimo);
+                    }, ()=>{
+                        alert('Ops, nao foi possível salvar seus dados no momento. Mas ainda sim você pode editar algorítimos.');
+                        algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
+                        this.editor.getDoc().setValue(algoritimo);
+                    });
+                }
             }, ()=>{
-                alert('Ops, nao foi possível salvar seus dados no momento. Mas ainda sim você pode editar algorítimos.');
+                alert('Ops, tivemos um problema ao tentar identificar você. Mas você ainda pode usar o editor, só que sem salvar seus dados.');
                 algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
                 this.editor.getDoc().setValue(algoritimo);
-            });
+            })
         }else{
             algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
             this.editor.getDoc().setValue(algoritimo);
         }
-
-       
-
     }
 
     const getAlunoLocal = ()=>{
@@ -188,9 +201,12 @@ const fbService = (()=>{
     }
 
     const getDados = (aluno, cbSuccess, cbError)=>{
-        docRef.doc(aluno.email).get(aluno).then(function(docRef) {
+        let firestore = firebase.firestore(); 
+        const docRef = firestore.collection('alunos');
+        
+        docRef.doc(aluno.email).get().then(function(x) {
             console.log("documento lido!");
-            cbSuccess(docRef);
+            cbSuccess(x.data());
           })
           .catch(function(error) {
               console.error("Erro lendo documento: ", error);

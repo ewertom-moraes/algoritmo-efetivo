@@ -81,7 +81,42 @@ algoritimoEfetivo =  (()=>{
 
     const salvaCodigo = ()=>{
         const  algoritimo =  this.editor.getDoc().getValue();
-        localStorage.setItem('algoritimo', algoritimo);
+        let aluno = getAlunoLocal();
+        aluno.codigos = aluno.codigos || {};
+        aluno.codigos['algoritimo'] = algoritimo;
+        fbService.salvaDados(aluno);
+        setObjLocal('aluno', aluno);
+        //localStorage.setItem('algoritimo', algoritimo);
+    }
+
+    const verificaDadosAluno = ()=>{
+        const aluno = getObjLocal('aluno');
+        if(!aluno){
+            let aluno = {};
+            aluno.nome = prompt('Bem vindo ao algoritimo efetivo. Qual seu nome?');
+            aluno.email = prompt('E seu e-mail?');
+            aluno.codigos = {};
+            aluno.codigos['algoritimo'] = '//escreva seu primeiro algoritimo aqui';
+            setObjLocal('aluno',aluno);
+            fbService.salvaDados(aluno, ()=>{
+                algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
+                this.editor.getDoc().setValue(algoritimo);
+            }, ()=>{
+                alert('Ops, nao foi possível salvar seus dados no momento. Mas ainda sim você pode editar algorítimos.');
+                algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
+                this.editor.getDoc().setValue(algoritimo);
+            });
+        }else{
+            algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
+            this.editor.getDoc().setValue(algoritimo);
+        }
+
+       
+
+    }
+
+    const getAlunoLocal = ()=>{
+        return  getObjLocal('aluno');
     }
 
     const init = ()=>{
@@ -99,9 +134,11 @@ algoritimoEfetivo =  (()=>{
             keyword: estilizar
         });
 
-        this.editor.getDoc().setValue((localStorage.getItem('algoritimo') || '//escreva seu primeiro algoritimo aqui'));
+        
 
-        setInterval(salvaCodigo, 5000);
+        verificaDadosAluno();
+
+        setInterval(salvaCodigo, 20000);
 
     }
 
@@ -114,6 +151,80 @@ algoritimoEfetivo =  (()=>{
 
 })();
 
+const getObjLocal = (nome)=>{
+    try {
+        return JSON.parse(localStorage.getItem(nome));
+    } catch (error) {
+        return undefined;
+    }
+}
+
+const setObjLocal = (nome, obj)=>{
+    try {
+        return  localStorage.setItem(nome, JSON.stringify(obj)) ;
+    } catch (error) {
+        return undefined;
+    }
+}
+
+
+const fbService = (()=>{
+
+    let app;
+
+    const init = ()=>{
+        const firebaseConfig = {
+            apiKey: "AIzaSyBhqNCF9FTuMIOQKe9WC1LcRf7DOrwBaI4",
+            authDomain: "algoritimo-efetivo.firebaseapp.com",
+            projectId: "algoritimo-efetivo",
+            storageBucket: "algoritimo-efetivo.appspot.com",
+            messagingSenderId: "760804447992",
+            appId: "1:760804447992:web:7b724a912547876f2d0d0d"
+        };
+
+        // Initialize Firebase
+        this.app = firebase.initializeApp(firebaseConfig);
+      
+    }
+
+    const getDados = (aluno, cbSuccess, cbError)=>{
+        docRef.doc(aluno.email).get(aluno).then(function(docRef) {
+            console.log("documento lido!");
+            cbSuccess(docRef);
+          })
+          .catch(function(error) {
+              console.error("Erro lendo documento: ", error);
+              cbError(error);
+          });
+    }
+
+    const salvaDados = (aluno, cbSucesso, cbErro)=>{
+        let fn = ()=>{};
+        cbSucesso = cbSucesso || fn;
+        cbErro = cbErro || fn;
+
+        let firestore = firebase.firestore(); 
+        const docRef = firestore.collection('alunos');
+        docRef.doc(aluno.email).set(aluno).then(function(docRef) {
+          console.log("Document successfully written!", docRef);
+          cbSucesso(docRef);
+        })
+        .catch(function(error) {
+            console.error("Error adding document: ", error);
+            cbErro(error);
+        });
+        
+    }
+
+    return {
+        salvaDados,
+        getDados,
+        init
+    }
+
+})();
+
+fbService.init();
 algoritimoEfetivo.init();
 
 

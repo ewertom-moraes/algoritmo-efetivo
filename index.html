@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algoritimo - Programação Efetiva</title>
+    <script src="./codemirror-5.65.14/lib/codemirror.js" ></script>
+    <script src="./codemirror-5.65.14/mode/javascript/javascript.js" ></script>
+    <script src="./codemirror-5.65.14/addon/keyword.1.0.js" ></script>
+    <link rel="stylesheet" href="./codemirror-5.65.14/lib/codemirror.css" />
+    <link rel="stylesheet" href="./codemirror-5.65.14/theme/dracula.css" />
+    <style>
+        .CodeMirror {
+            font-size: 16px;
+            /* border: 1px solid #eee; */
+            height: 90vb;
+         }
+
+         .cm-style1 {
+            color: #ff79c6 !important;
+            }
+
+    </style>
+</head>
+<body>
+    
+    <div style="width: 40%;">
+        <textarea rows="10" cols="100" id="algoritimo"></textarea>
+        <button type="button" onclick="compilaAlgoritimo()">Executar</button>
+    </div>
+    <div style="width: 40%;" id="div_log">
+        
+    </div>
+
+    
+    <script >
+
+        console.log('carregou'); 
+
+
+        let editor = CodeMirror.fromTextArea(
+            document.getElementById("algoritimo"), {
+                mode: 'javascript',
+                lineNumbers: true,
+                theme: "dracula",
+                keyword: {
+                    "se": "style1",
+                    "para": "style1",
+                    "enquanto": "style1",
+                    "senão": "style1",
+                    "senao": "style1",
+                    "faca": "style1",
+                    "faça": "style1",
+                    "example\.com": "style2",
+                    "abc\\d+": "style2"
+                }
+        });
+
+        editor.getDoc().setValue((localStorage.getItem('algoritimo') || 'teste'));
+        
+        const  algoritimo = localStorage.getItem('algoritimo');
+        document.getElementById('algoritimo').value = algoritimo;
+
+        function compilaAlgoritimo(){
+
+            limpaLog();
+            
+            let algoritimo = editor.getDoc().getValue(); //document.getElementById('algoritimo').value;
+
+            localStorage.setItem('algoritimo', algoritimo);
+
+            let codigo = algoritimo
+                        .replace(/var /ig, 'let ')
+                        .replace(/se\(/ig, 'if(')
+                        .replace(/senao\{/ig, 'else{')
+                        .replace(/senão{/ig, 'else{')
+                        .replace(/\para\(/ig, 'for(')
+                        .replace(/\enquanto\(/ig, 'while(')
+                        .replace(/\faça\(/ig, 'do(')
+                        .replace(/\faca\(/ig, 'do(')
+                        .replace(/\.paraCada\( /ig, 'forEach(')
+                        .replace(/recebe\(/ig, 'prompt(')
+                        .replace(/imprime\(/ig, 'log(');
+
+            //FOR
+            let novoCodigo = codigo;
+            let iFor = codigo.indexOf('for(');
+            let fFor = codigo.indexOf(')', iFor);
+            while(iFor !=-1){
+                let sub = codigo.substring(iFor+4);
+                let iFim = sub.indexOf(')');
+
+                sub = sub.substring(0,iFim);
+                let dados = sub.split(' ');
+                let novo = dados[1].replace('de','let '+dados[0]+'=');
+                novo += dados[2]+";";
+                novo += 'i<'+dados[4]+";";
+                novo += dados[0]+'++';
+
+                novoCodigo = codigo.substring(0,iFor) + 'for('+novo+')' + codigo.substring(fFor+1) ;
+
+                iFor = codigo.indexOf('for(', iFor+4);
+                fFor = codigo.indexOf(')', iFor);
+            }
+            codigo = novoCodigo;
+
+
+
+            console.log(codigo);
+            try {
+                eval(codigo);
+            } catch (error) {
+                alert('falha no algoritimo.');
+                console.log(error);
+            }
+            
+        }
+
+        function log(valor){
+            let logAtual = document.getElementById('div_log').innerHTML;
+            logAtual += '<br>'+ valor;
+            document.getElementById('div_log').innerHTML = logAtual;
+        }
+        
+        function limpaLog(){
+            document.getElementById('div_log').innerHTML = '';
+        }
+
+    </script>
+
+</body>
+</html>

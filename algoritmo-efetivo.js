@@ -1,6 +1,7 @@
 algoritimoEfetivo =  (()=>{
 
     let editor;
+    let codigoSelecionado;
     
     const palavrasEstilizar = ['var', 'nao', 'não', 'senão se','senao se', 'se',  'senao', ' E ', ' OU ', 'para', 'enquanto', 'faça', 'faca', 'avalie', 'caso', 'parar', 'padrao', 'padrão']
 
@@ -79,14 +80,19 @@ algoritimoEfetivo =  (()=>{
         document.getElementById('div_log').innerHTML = '';
     }
 
+    const sincronizaAluno = ()=>{
+        let aluno = getAlunoLocal();
+        fbService.salvaDados(aluno);
+    }
+
     const salvaCodigo = ()=>{
         const  algoritimo =  this.editor.getDoc().getValue();
         let aluno = getAlunoLocal();
-        aluno.codigos = aluno.codigos || {};
-        aluno.codigos['algoritimo'] = algoritimo;
-        fbService.salvaDados(aluno);
+        aluno.codigos = aluno.codigos || [];
+
+        const index = aluno.codigos.findIndex((x)=>x.nome == this.codigoSelecionado.nome);
+        aluno.codigos[index].codigo = algoritimo;
         setObjLocal('aluno', aluno);
-        //localStorage.setItem('algoritimo', algoritimo);
     }
 
     const verificaDadosAluno = async ()=>{
@@ -107,14 +113,15 @@ algoritimoEfetivo =  (()=>{
 
                 if(alunoBase){
                     aluno = alunoBase;
-                    algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
-                    this.editor.getDoc().setValue(algoritimo);
+                    this.codigoSelecionado = aluno.codigos[0];
+                    atualizaCodigoSelecionadoTela();
                     setObjLocal('aluno',aluno);
+                    populaSelect(aluno);
                     Swal.fire(
                         `Olá, ${aluno.nome}!`,
                         'Bem vindo de volta!',
                         'success'
-                        )
+                        );
                    // alert('Bem vindo de volta, '+aluno.nome);
                 }else{
                     const { value: name } =   await Swal.fire({
@@ -125,21 +132,21 @@ algoritimoEfetivo =  (()=>{
                     
                     aluno.nome = name;
                     //aluno.nome = prompt('Bem vindo ao algoritimo efetivo. Qual seu nome?');
-                    aluno.codigos = {};
-                    aluno.codigos['algoritimo'] = '//escreva seu primeiro algoritimo aqui';
+                    aluno.codigos = [];
+                    aluno.codigos.push({ nome : 'Inicial', codigo :  '//escreva seu primeiro algoritimo aqui'});
+                    this.codigoSelecionado = aluno.codigos[0];
+                    populaSelect(aluno);
+
                     fbService.salvaDados(aluno, ()=>{
                         setObjLocal('aluno',aluno);
-                        algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
-                        this.editor.getDoc().setValue(algoritimo);
+                        atualizaCodigoSelecionadoTela();
                     }, ()=>{
                         Swal.fire({
                             icon: 'error',
                             title: 'Oops...',
                             text: 'nao foi possível salvar seus dados no momento. Mas ainda sim você pode editar algorítimos.'
                           })
-                        //alert('Ops, nao foi possível salvar seus dados no momento. Mas ainda sim você pode editar algorítimos.');
-                        algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
-                        this.editor.getDoc().setValue(algoritimo);
+                        atualizaCodigoSelecionadoTela();
                     });
                 }
             }, ()=>{
@@ -149,17 +156,67 @@ algoritimoEfetivo =  (()=>{
                     text: 'tivemos um problema ao tentar identificar você. Mas você ainda pode usar o editor, só que sem salvar seus dados.'
                   })
                 //alert('Ops, tivemos um problema ao tentar identificar você. Mas você ainda pode usar o editor, só que sem salvar seus dados.');
-                algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
-                this.editor.getDoc().setValue(algoritimo);
-            })
+                aluno.codigos = [];
+                aluno.codigos.push({ nome : 'Inicial', codigo :  '//escreva seu primeiro algoritimo aqui'});
+                this.codigoSelecionado = aluno.codigos[0];
+                atualizaCodigoSelecionadoTela();
+            });
         }else{
-            algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
-            this.editor.getDoc().setValue(algoritimo);
+
+            this.codigoSelecionado = aluno.codigos[0];
+            populaSelect(aluno);
+            atualizaCodigoSelecionadoTela();
         }
+
+        
+    }
+
+    const atualizaCodigoSelecionadoTela = ()=>{
+        $('#select_codigos').val(this.codigoSelecionado.nome);
+        this.editor.getDoc().setValue(this.codigoSelecionado.codigo);
+    }
+    
+    const populaSelect = (aluno)=>{
+        const $select = $('#select_codigos');
+        $select.html('');
+        aluno.codigos.forEach(cod=>{
+            $select.append(`<option value="${cod.nome}">${cod.nome}</option>`);
+        })
+        
+    }
+
+    const changeCodigo = (elem)=>{
+        const aluno = getAlunoLocal('aluno');
+        const index = aluno.codigos.findIndex(x=>x.nome == elem.value);
+        this.codigoSelecionado = aluno.codigos[index];
+        atualizaCodigoSelecionadoTela();
+    }
+
+    const novoCodigo = async (elem)=>{
+        
+        salvaCodigo();
+
+        const { value: name } =   await Swal.fire({
+            title: 'Dê um nome para seu novo código',
+            input: 'text',
+            inputPlaceholder: 'Nome do código'
+        });
+
+        const aluno = getObjLocal('aluno');
+        codigo = { nome : name, codigo : ''};
+        aluno.codigos.push(codigo);
+        setObjLocal('aluno', aluno);
+        this.codigoSelecionado = codigo;
+        populaSelect(aluno);
     }
 
     const getAlunoLocal = ()=>{
         return  getObjLocal('aluno');
+    }
+
+    const logout = ()=>{
+        setObjLocal('aluno', null);
+        window.location.reload();
     }
 
     const init = ()=>{
@@ -181,7 +238,7 @@ algoritimoEfetivo =  (()=>{
 
         verificaDadosAluno();
 
-        setInterval(salvaCodigo, 20000);
+        setInterval(sincronizaAluno, 60000);
 
     }
 
@@ -189,7 +246,10 @@ algoritimoEfetivo =  (()=>{
     return {
         log, 
         interpreta,
-        init 
+        init,
+        logout,
+        changeCodigo,
+        novoCodigo
     }
 
 })();

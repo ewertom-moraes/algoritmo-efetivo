@@ -35,18 +35,36 @@
             <img src="./img/logo_PE.png" alt="" width="50" class="d-inline-block align-text-top">
             Algoritimo Efetivo
           </a>
+          <div class="dropdown text-end" >
+            <a href="#" class="d-block text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="./img/user.webp" alt="mdo" width="32" height="32" class="rounded-circle">
+            </a>
+            <ul class="dropdown-menu text-small dropdown-menu-end">
+            <li><a class="dropdown-item" href="javascript:algoritimoEfetivo.logout()">Sair</a></li>
+            </ul>
+        </div>
         </div>
       </nav>
     <div class="container-fluid">
         <div class="card" >
             <div class="card-body">
                 <div class="row">
+                    <div class="col-md-4 col-xs-12">
+                        <label>Meus Códigos</label> 
+                        <div class="input-group mb-2">
+                            <select id="select_codigos" class="form-select " onchange="algoritimoEfetivo.changeCodigo(this)"></select>
+                            <button class="btn btn-outline-secondary" type="button" onclick="algoritimoEfetivo.novoCodigo(this)">Novo</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-md-6">
                         <div style="width: 100%;">
                             <textarea rows="10" cols="100" id="algoritimo"></textarea>
                         </div>
                     </div>
-                    <div class="col-md-1 text-center ">
+                    <div class="col-md-1  text-center ">
+                        
                         <button type="button" style="width: 100%;" class="btn pe" onclick="algoritimoEfetivo.interpreta()">Executar</button>
                     </div>
                     <div class="col-md-5">
@@ -60,6 +78,7 @@
     <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.16.1/firebase-database.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script>
         
 

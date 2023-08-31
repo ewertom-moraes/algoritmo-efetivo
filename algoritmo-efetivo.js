@@ -89,22 +89,42 @@ algoritimoEfetivo =  (()=>{
         //localStorage.setItem('algoritimo', algoritimo);
     }
 
-    const verificaDadosAluno = ()=>{
+    const verificaDadosAluno = async ()=>{
         const aluno = getObjLocal('aluno');
         if(!aluno){
             let aluno = {};
-            aluno.email = prompt('E seu e-mail?');
+            //aluno.email = prompt('E seu e-mail?');
+            const { value: email } = await Swal.fire({
+                title: 'Olá, qual seu e-mail?',
+                input: 'email',
+                //inputLabel: 'Seu e-mail',
+                inputPlaceholder: 'Entre com seu e-mail'
+              });
+            aluno.email = email;
+              
             
-            fbService.getDados(aluno,(alunoBase)=>{
+            fbService.getDados(aluno, async (alunoBase)=>{
 
                 if(alunoBase){
                     aluno = alunoBase;
                     algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
                     this.editor.getDoc().setValue(algoritimo);
                     setObjLocal('aluno',aluno);
-                    alert('Bem vindo de volta, '+aluno.nome);
+                    Swal.fire(
+                        `Olá, ${aluno.nome}!`,
+                        'Bem vindo de volta!',
+                        'success'
+                        )
+                   // alert('Bem vindo de volta, '+aluno.nome);
                 }else{
-                    aluno.nome = prompt('Bem vindo ao algoritimo efetivo. Qual seu nome?');
+                    const { value: name } =   await Swal.fire({
+                        title: 'Bem vindo ao algoritimo efetivo. Qual seu nome?',
+                        input: 'text',
+                        inputPlaceholder: 'Entre com seu e-mail'
+                      });
+                    
+                    aluno.nome = name;
+                    //aluno.nome = prompt('Bem vindo ao algoritimo efetivo. Qual seu nome?');
                     aluno.codigos = {};
                     aluno.codigos['algoritimo'] = '//escreva seu primeiro algoritimo aqui';
                     fbService.salvaDados(aluno, ()=>{
@@ -112,13 +132,23 @@ algoritimoEfetivo =  (()=>{
                         algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
                         this.editor.getDoc().setValue(algoritimo);
                     }, ()=>{
-                        alert('Ops, nao foi possível salvar seus dados no momento. Mas ainda sim você pode editar algorítimos.');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'nao foi possível salvar seus dados no momento. Mas ainda sim você pode editar algorítimos.'
+                          })
+                        //alert('Ops, nao foi possível salvar seus dados no momento. Mas ainda sim você pode editar algorítimos.');
                         algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
                         this.editor.getDoc().setValue(algoritimo);
                     });
                 }
             }, ()=>{
-                alert('Ops, tivemos um problema ao tentar identificar você. Mas você ainda pode usar o editor, só que sem salvar seus dados.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'tivemos um problema ao tentar identificar você. Mas você ainda pode usar o editor, só que sem salvar seus dados.'
+                  })
+                //alert('Ops, tivemos um problema ao tentar identificar você. Mas você ainda pode usar o editor, só que sem salvar seus dados.');
                 algoritimo = aluno.codigos['algoritimo'] || '//escreva seu primeiro algoritimo aqui';
                 this.editor.getDoc().setValue(algoritimo);
             })
@@ -178,6 +208,10 @@ const setObjLocal = (nome, obj)=>{
     } catch (error) {
         return undefined;
     }
+}
+
+const alertSw = ()=>{
+    
 }
 
 

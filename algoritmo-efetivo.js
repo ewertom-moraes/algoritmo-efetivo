@@ -1,51 +1,39 @@
 algoritimoEfetivo =  (()=>{
 
-    console.log('carregou'); 
-
-
-    let editor = CodeMirror.fromTextArea(
-    document.getElementById("algoritimo"), {
-        mode: 'javascript',
-        lineNumbers: true,
-        theme: "dracula",
-        keyword: {
-            "se": "style1",
-            "para": "style1",
-            "enquanto": "style1",
-            "senão": "style1",
-            "senao": "style1",
-            "faca": "style1",
-            "faça": "style1",
-            "example\.com": "style2",
-            "abc\\d+": "style2"
-        }
-    });
-
-    editor.getDoc().setValue((localStorage.getItem('algoritimo') || 'teste'));
-
-    const  algoritimo = localStorage.getItem('algoritimo');
-    document.getElementById('algoritimo').value = algoritimo;
+    let editor;
+    
+    const palavrasEstilizar = ['var', 'nao', 'não', 'senão se','senao se', 'se',  'senao', ' E ', ' OU ', 'para', 'enquanto', 'faça', 'faca', 'avalie', 'caso', 'parar', 'padrao', 'padrão']
 
     const interpreta = ()=>{
 
         limpaLog();
         
-        let algoritimo = editor.getDoc().getValue(); //document.getElementById('algoritimo').value;
-
-        localStorage.setItem('algoritimo', algoritimo);
+        let algoritimo = this.editor.getDoc().getValue(); //document.getElementById('algoritimo').value;
 
         let codigo = algoritimo
                     .replace(/var /ig, 'let ')
+                    .replace(/senao se\(/ig, 'else if(')
+                    .replace(/senão se\(/ig, 'else if(')
                     .replace(/se\(/ig, 'if(')
                     .replace(/senao\{/ig, 'else{')
                     .replace(/senão{/ig, 'else{')
+                    .replace(/avalie\(/ig, 'switch(')
+                    .replace(/caso /ig, 'case ')
+                    .replace(/parar;/ig, 'break;')
+                    .replace(/padrao:/ig, 'default:')
+                    .replace(/padrão:/ig, 'default:')
+                    .replace(/ E /g, ' && ')
+                    .replace(/ OU /g, ' || ')
                     .replace(/\para\(/ig, 'for(')
                     .replace(/\enquanto\(/ig, 'while(')
                     .replace(/\faça\(/ig, 'do(')
                     .replace(/\faca\(/ig, 'do(')
                     .replace(/\.paraCada\( /ig, 'forEach(')
                     .replace(/recebe\(/ig, 'prompt(')
-                    .replace(/imprime\(/ig, 'algoritimoEfetivo.log(');
+                    .replace(/imprime\(/ig, 'algoritimoEfetivo.log(')
+                    .replace(/alerta\(/ig, 'alert(')
+                    .replace(/funcao /ig, 'function ')
+                    .replace(/função /ig, 'function ')
 
         //FOR
         let novoCodigo = codigo;
@@ -91,12 +79,42 @@ algoritimoEfetivo =  (()=>{
         document.getElementById('div_log').innerHTML = '';
     }
 
+    const salvaCodigo = ()=>{
+        const  algoritimo =  this.editor.getDoc().getValue();
+        localStorage.setItem('algoritimo', algoritimo);
+    }
+
+    const init = ()=>{
+        const estilizar = {};
+        palavrasEstilizar.forEach(x=>{
+            estilizar[x.trim()] = 'style1';
+            estilizar[x.toUpperCase().trim()] = 'style1';
+        })
+        
+        this.editor = CodeMirror.fromTextArea(
+        document.getElementById("algoritimo"), {
+            mode: 'javascript',
+            lineNumbers: true,
+            theme: "dracula",
+            keyword: estilizar
+        });
+
+        this.editor.getDoc().setValue((localStorage.getItem('algoritimo') || '//escreva seu primeiro algoritimo aqui'));
+
+        setInterval(salvaCodigo, 5000);
+
+    }
+
+
     return {
         log, 
-        interpreta
+        interpreta,
+        init 
     }
 
 })();
+
+algoritimoEfetivo.init();
 
 
 

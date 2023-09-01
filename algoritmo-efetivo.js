@@ -30,9 +30,9 @@ algoritimoEfetivo =  (()=>{
                     .replace(/\faça\(/ig, 'do(')
                     .replace(/\faca\(/ig, 'do(')
                     .replace(/\.paraCada\( /ig, 'forEach(')
-                    .replace(/recebe\(/ig, 'prompt(')
-                    .replace(/imprime\(/ig, 'algoritimoEfetivo.log(')
-                    .replace(/alerta\(/ig, 'alert(')
+                    .replace(/recebe\(/ig, 'await algoritimoEfetivo.recebe(')
+                    .replace(/imprime\(/ig, 'await algoritimoEfetivo.log(')
+                    .replace(/alerta\(/ig, 'algoritimoEfetivo.alerta(')
                     .replace(/funcao /ig, 'function ')
                     .replace(/função /ig, 'function ')
 
@@ -62,7 +62,7 @@ algoritimoEfetivo =  (()=>{
 
         console.log(codigo);
         try {
-            eval(codigo);
+            eval(`(async()=>{${codigo}})()`);
         } catch (error) {
             alert('falha no algoritimo.');
             console.log(error);
@@ -70,10 +70,29 @@ algoritimoEfetivo =  (()=>{
         
     }
 
-    const log = (valor)=>{
-        let logAtual = document.getElementById('div_log').innerHTML;
+    const log = async (valor)=>{
+        let logAtual = await $('#div_log').html();
         logAtual += '<br>'+ valor;
-        document.getElementById('div_log').innerHTML = logAtual;
+        await $('#div_log').html(logAtual);
+    }
+
+    function timeout(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    async function sleep(fn, ...args) {
+        await timeout(3000);
+        return fn(...args);
+    }
+
+    const alerta = async (valor)=>{
+        setTimeout(() => {
+            alert(valor);
+        }, 20);
+    }
+
+    const recebe = async (valor)=>{
+        await timeout(20);
+        return prompt(valor);
     }
     
     const limpaLog = ()=>{
@@ -126,9 +145,9 @@ algoritimoEfetivo =  (()=>{
                 if(alunoBase){
                     aluno = alunoBase;
                     defineCodigoSelecionado(aluno);
-                    atualizaDadosTela();
                     setObjLocal('aluno',aluno);
                     populaSelect(aluno);
+                    atualizaDadosTela();
                     Swal.fire(
                         `Olá, ${aluno.nome}!`,
                         'Bem vindo de volta!',
@@ -203,6 +222,7 @@ algoritimoEfetivo =  (()=>{
     }
 
     const changeCodigo = (elem)=>{
+        salvaCodigo();
         const aluno = getAlunoLocal('aluno');
         const index = aluno.codigos.findIndex(x=>x.nome == elem.value);
         this.codigoSelecionado = aluno.codigos[index];
@@ -265,6 +285,8 @@ algoritimoEfetivo =  (()=>{
 
     return {
         log, 
+        alerta,
+        recebe,
         interpreta,
         init,
         logout,

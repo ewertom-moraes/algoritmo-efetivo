@@ -80,9 +80,21 @@ algoritimoEfetivo =  (()=>{
         document.getElementById('div_log').innerHTML = '';
     }
 
-    const sincronizaAluno = ()=>{
+    const salvaAluno = ()=>{
+        sincronizaAluno(()=>{
+            Swal.fire(
+                `Ok`,
+                'Dados salvos com sucesso',
+                'success'
+                );
+        })
+    }
+
+    const sincronizaAluno = (cbSucesso)=>{
+        cbSucesso = cbSucesso || (()=>{});
+        salvaCodigo();
         let aluno = getAlunoLocal();
-        fbService.salvaDados(aluno);
+        fbService.salvaDados(aluno, cbSucesso);
     }
 
     const salvaCodigo = ()=>{
@@ -113,8 +125,8 @@ algoritimoEfetivo =  (()=>{
 
                 if(alunoBase){
                     aluno = alunoBase;
-                    this.codigoSelecionado = aluno.codigos[0];
-                    atualizaCodigoSelecionadoTela();
+                    defineCodigoSelecionado(aluno);
+                    atualizaDadosTela();
                     setObjLocal('aluno',aluno);
                     populaSelect(aluno);
                     Swal.fire(
@@ -134,19 +146,19 @@ algoritimoEfetivo =  (()=>{
                     //aluno.nome = prompt('Bem vindo ao algoritimo efetivo. Qual seu nome?');
                     aluno.codigos = [];
                     aluno.codigos.push({ nome : 'Inicial', codigo :  '//escreva seu primeiro algoritimo aqui'});
-                    this.codigoSelecionado = aluno.codigos[0];
+                    defineCodigoSelecionado(aluno);
                     populaSelect(aluno);
 
                     fbService.salvaDados(aluno, ()=>{
                         setObjLocal('aluno',aluno);
-                        atualizaCodigoSelecionadoTela();
+                        atualizaDadosTela();
                     }, ()=>{
                         Swal.fire({
                             icon: 'error',
                             title: 'Oops...',
                             text: 'nao foi possível salvar seus dados no momento. Mas ainda sim você pode editar algorítimos.'
                           })
-                        atualizaCodigoSelecionadoTela();
+                        atualizaDadosTela();
                     });
                 }
             }, ()=>{
@@ -158,22 +170,27 @@ algoritimoEfetivo =  (()=>{
                 //alert('Ops, tivemos um problema ao tentar identificar você. Mas você ainda pode usar o editor, só que sem salvar seus dados.');
                 aluno.codigos = [];
                 aluno.codigos.push({ nome : 'Inicial', codigo :  '//escreva seu primeiro algoritimo aqui'});
-                this.codigoSelecionado = aluno.codigos[0];
-                atualizaCodigoSelecionadoTela();
+                defineCodigoSelecionado(aluno);
+                atualizaDadosTela();
             });
         }else{
 
-            this.codigoSelecionado = aluno.codigos[0];
+            defineCodigoSelecionado(aluno);
             populaSelect(aluno);
-            atualizaCodigoSelecionadoTela();
+            atualizaDadosTela();
         }
 
         
     }
 
-    const atualizaCodigoSelecionadoTela = ()=>{
+    const defineCodigoSelecionado = (aluno)=>{
+        this.codigoSelecionado =  aluno.codigos[aluno.codigos.length-1];
+    }
+
+    const atualizaDadosTela = ()=>{
         $('#select_codigos').val(this.codigoSelecionado.nome);
         this.editor.getDoc().setValue(this.codigoSelecionado.codigo);
+        $('#nome_aluno').html(getObjLocal('aluno').nome);
     }
     
     const populaSelect = (aluno)=>{
@@ -189,7 +206,7 @@ algoritimoEfetivo =  (()=>{
         const aluno = getAlunoLocal('aluno');
         const index = aluno.codigos.findIndex(x=>x.nome == elem.value);
         this.codigoSelecionado = aluno.codigos[index];
-        atualizaCodigoSelecionadoTela();
+        atualizaDadosTela();
     }
 
     const novoCodigo = async (elem)=>{
@@ -208,6 +225,7 @@ algoritimoEfetivo =  (()=>{
         setObjLocal('aluno', aluno);
         this.codigoSelecionado = codigo;
         populaSelect(aluno);
+        atualizaDadosTela();
     }
 
     const getAlunoLocal = ()=>{
@@ -215,8 +233,10 @@ algoritimoEfetivo =  (()=>{
     }
 
     const logout = ()=>{
-        setObjLocal('aluno', null);
-        window.location.reload();
+        sincronizaAluno(()=>{
+            setObjLocal('aluno', null);
+            window.location.reload();
+        });
     }
 
     const init = ()=>{
@@ -249,7 +269,8 @@ algoritimoEfetivo =  (()=>{
         init,
         logout,
         changeCodigo,
-        novoCodigo
+        novoCodigo,
+        salvaAluno
     }
 
 })();

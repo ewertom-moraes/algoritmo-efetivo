@@ -3,7 +3,7 @@ algoritimoEfetivo =  (()=>{
     let editor;
     let codigoSelecionado;
     
-    const palavrasEstilizar = ['var', 'nao', 'não', 'senão se','senao se', 'se',  'senao', ' E ', ' OU ', 'para', 'enquanto', 'faça', 'faca', 'avalie', 'caso', 'parar', 'padrao', 'padrão']
+    const palavrasEstilizar = ['var', 'nao', 'não', 'senão se','senao se', 'se',  'senao', ' E ', ' OU ','paraCada', 'para', 'enquanto', 'faça', 'faca', 'avalie', 'caso', 'parar', 'padrao', 'padrão']
 
     const interpreta = ()=>{
 
@@ -13,6 +13,7 @@ algoritimoEfetivo =  (()=>{
 
         let codigo = algoritimo
                     .replace(/var /ig, 'let ')
+                    .replace(/ nulo/ig, ' null')
                     .replace(/senao se\(/ig, 'else if(')
                     .replace(/senão se\(/ig, 'else if(')
                     .replace(/se\(/ig, 'if(')
@@ -23,15 +24,16 @@ algoritimoEfetivo =  (()=>{
                     .replace(/parar;/ig, 'break;')
                     .replace(/padrao:/ig, 'default:')
                     .replace(/padrão:/ig, 'default:')
-                    .replace(/ E /g, ' && ')
-                    .replace(/ OU /g, ' || ')
+                    .replace(/\sE\s/g, ' && ')
+                    .replace(/\sOU\s/g, ' || ')
                     .replace(/\para\(/ig, 'for(')
                     .replace(/\enquanto\(/ig, 'while(')
                     .replace(/\faça\(/ig, 'do(')
                     .replace(/\faca\(/ig, 'do(')
-                    .replace(/\.paraCada\( /ig, 'forEach(')
+                    .replace(/\.paraCada\(/ig, '.forEach( ')
+                    .replace(/\.tamanho/ig, '.length ')
                     .replace(/recebe\(/ig, 'await algoritimoEfetivo.recebe(')
-                    .replace(/imprime\(/ig, 'await algoritimoEfetivo.log(')
+                    .replace(/imprime\(/ig, ' algoritimoEfetivo.log(')
                     .replace(/alerta\(/ig, 'algoritimoEfetivo.alerta(')
                     .replace(/funcao /ig, 'function ')
                     .replace(/função /ig, 'function ')
@@ -70,10 +72,10 @@ algoritimoEfetivo =  (()=>{
         
     }
 
-    const log = async (valor)=>{
-        let logAtual = await $('#div_log').html();
+    const log =  (valor)=>{
+        let logAtual =  $('#div_log').html();
         logAtual += '<br>'+ valor;
-        await $('#div_log').html(logAtual);
+         $('#div_log').html(logAtual);
     }
 
     function timeout(ms) {
@@ -158,7 +160,7 @@ algoritimoEfetivo =  (()=>{
                     const { value: name } =   await Swal.fire({
                         title: 'Bem vindo ao algoritimo efetivo. Qual seu nome?',
                         input: 'text',
-                        inputPlaceholder: 'Entre com seu e-mail'
+                        inputPlaceholder: 'Digite seu primeiro nome'
                       });
                     
                     aluno.nome = name;

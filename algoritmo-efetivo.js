@@ -280,7 +280,7 @@ algoritimoEfetivo =  (()=>{
 
         verificaDadosAluno();
 
-        setInterval(sincronizaAluno, 60000);
+        setInterval(sincronizaAluno, 300000);
 
     }
 

@@ -3,7 +3,7 @@ algoritimoEfetivo =  (()=>{
     let editor;
     let codigoSelecionado;
     
-    const palavrasEstilizar = ['var', 'nao', 'não', 'senão se','senao se', 'se',  'senao', ' E ', ' OU ','paraCada', 'para', 'enquanto', 'faça', 'faca', 'avalie', 'caso', 'parar', 'padrao', 'padrão']
+    const palavrasEstilizar = ['var', 'nao', 'não', 'senão se','senao se', 'se',  'senao', ' E ', ' OU ','paraCada', 'para', 'enquanto', 'faça', 'faca', 'avalie', 'caso', 'parar', 'padrao', 'padrão', 'funcao', 'função', 'retorna']
 
     const interpreta = ()=>{
 
@@ -37,6 +37,7 @@ algoritimoEfetivo =  (()=>{
                     .replace(/alerta\(/ig, 'algoritimoEfetivo.alerta(')
                     .replace(/funcao /ig, 'function ')
                     .replace(/função /ig, 'function ')
+                    .replace(/retorna /ig, 'return ')
 
         //FOR
         let novoCodigo = codigo;

@@ -56,10 +56,11 @@ algoritimoEfetivo =  (()=>{
 
             novoCodigo = codigo.substring(0,iFor) + 'for('+novo+')' + codigo.substring(fFor+1) ;
 
+            codigo = novoCodigo;
+            
             iFor = codigo.indexOf('for(', iFor+4);
             fFor = codigo.indexOf(')', iFor);
         }
-        codigo = novoCodigo;
 
 
 
